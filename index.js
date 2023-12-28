@@ -40,7 +40,7 @@ async function run() {
     const productsCollection = client.db('trendy-tech').collection('products');
     const userCollection = client.db('trendy-tech').collection('users');
     const reviewsCollection = client.db('trendy-tech').collection('reviews');
-
+    const likesCollection = client.db('trendy-tech').collection('likes');
 
     app.post('/products',async(req,res)=>{
       const body = req.body;
@@ -50,14 +50,12 @@ async function run() {
         minute:"numeric",
         hours12:true
       })}
-      const result = await productsCollection.insertOne({...product,likes:[]}) 
-      console.log(result);
+      const result = await productsCollection.insertOne({...product,likes:[],status:"pending"}) 
       res.send(result);
     })
     
     app.post ('/users',async(req,res)=>{
       const users = req.body;
-      console.log(users);
       const result = await userCollection.insertOne({...users,role:''});
       res.send(result);
     })
@@ -71,6 +69,35 @@ async function run() {
       })});
       res.send(result)
     })
+    app.post('/likes',async (req,res)=>{
+      const likes = req.body;
+      const result =  await likesCollection.insertOne({...likes,creationDate: new Date().toISOString().split('T')[0],
+      creationTime: new Date().toLocaleString("en-US",{
+        hour:"numeric",
+        minute:"numeric",
+        hours12:true
+      })})
+      console.log(result);
+      res.send(result)
+    })
+
+    app.get('/likes',async(req,res)=>{
+      const result =  await likesCollection.find({}).toArray();
+      console.log(result);
+      res.send(result);
+    })
+
+    app.delete('/dislikes',async (req,res)=>{
+      const dislikes = req.body;
+      console.log(dislikes);
+      const result = await likesCollection.deleteMany({product_id: dislikes.product_id,email:dislikes.email})
+      console.log(result);
+      res.send(result)
+    })
+    app.post('/likestatus',async (req,res)=>{
+      const result = req.body;
+      console.log(result);
+    })
     
     app.get('/products',async(req,res)=>{
       const result = await productsCollection.find({}).toArray();
@@ -78,7 +105,6 @@ async function run() {
     })
     app.get('/reviews',async(req,res)=>{
       const reviews = await reviewsCollection.find({}).toArray();
-      console.log(reviews);
       res.send(reviews)
     })
 
