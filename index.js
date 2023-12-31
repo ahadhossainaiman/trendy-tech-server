@@ -94,6 +94,14 @@ async function run() {
       console.log(result);
       res.send(result)
     })
+
+    app.delete('/deleteProduct',async(req,res)=>{
+      const id = req.body;
+      console.log(id.id);
+      const result = await productsCollection.deleteOne({_id: new ObjectId(id.id)})
+      console.log(result);
+      res.send(result);
+    })
     app.post('/likestatus',async (req,res)=>{
       const result = req.body;
       console.log(result);
