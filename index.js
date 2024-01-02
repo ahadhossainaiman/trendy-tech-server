@@ -44,6 +44,7 @@ async function run() {
 
     app.post('/products',async(req,res)=>{
       const body = req.body;
+      console.log(body);
       const product = {...body, creationDate: new Date().toISOString().split('T')[0],
       creationTime: new Date().toLocaleString("en-US",{
         hour:"numeric",
@@ -53,7 +54,14 @@ async function run() {
       const result = await productsCollection.insertOne({...product,likes:[],status:"pending"}) 
       res.send(result);
     })
-    
+    app.get('/dashboard/:id',async(req,res)=>{
+      const id = req?.params?.id;
+      const result = await productsCollection.findOne({_id: new ObjectId(id)})
+      console.log(result);
+      res.send(result)
+      console.log(id);
+    })
+
     app.post ('/users',async(req,res)=>{
       const users = req.body;
       const result = await userCollection.insertOne({...users,role:''});
@@ -77,29 +85,23 @@ async function run() {
         minute:"numeric",
         hours12:true
       })})
-      console.log(result);
       res.send(result)
     })
 
     app.get('/likes',async(req,res)=>{
       const result =  await likesCollection.find({}).toArray();
-      console.log(result);
       res.send(result);
     })
 
     app.delete('/dislikes',async (req,res)=>{
       const dislikes = req.body;
-      console.log(dislikes);
       const result = await likesCollection.deleteMany({product_id: dislikes.product_id,email:dislikes.email})
-      console.log(result);
       res.send(result)
     })
 
     app.delete('/deleteProduct',async(req,res)=>{
       const id = req.body;
-      console.log(id.id);
-      const result = await productsCollection.deleteOne({_id: new ObjectId(id.id)})
-      console.log(result);
+      const result = await productsCollection.deleteOne({_id: new ObjectId(id.id)});
       res.send(result);
     })
     app.post('/likestatus',async (req,res)=>{
